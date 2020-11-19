@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<!--
+ * 企业排班数据
+ * @author 梁佳宝
+ * @version 0.0.2
+ * @since 0.0.2 2020年6月4日15点43分
+-->
+<mapper namespace="com.dmsdbj.integral.dingtalk.provider.dao.AllScheduleDao">
+    <select id="findAllByPlanCheckTime" parameterType="java.lang.String" resultType="com.dingtalk.item.pojo.ScheduleDetailEntity">
+        SELECT
+            *
+        FROM
+            tid_schedule_detail
+        WHERE
+            create_time like "%"#{createTime}"%"
+    </select>
+<insert id="addSchedule" parameterType="com.dingtalk.item.pojo.ScheduleDetailEntity">
+    INSERT INTO
+        tid_schedule_detail(id,user_jifen_id,user_ding_id,user_name,user_code,plan_id,plan_check_time,group_id,class_setting_id,class_id,check_type,create_time)
+    VALUES
+    <foreach collection="scheduleDetailEntity" item="item"  separator=",">
+        (#{item.id},#{item.userJifenId},#{item.userId},#{item.userName},#{item.userCode},#{item.planId},#{item.planCheckTime},#{item.groupId},#{item.classSettingId},#{item.classId},#{item.checkType},now())
+    </foreach>
+</insert>
+    <select id="findByDingId" parameterType="java.util.Set" resultType="com.dmsdbj.integral.dingtalk.model.TcAllusersDateModel">
+        SELECT
+            user_code,
+            id,
+            user_name,
+            ding_id
+        FROM
+            tc_allusers
+        WHERE
+            ding_id
+            IN
+            <foreach collection ="useridset" index="index" item="item" open="(" close=")" separator =",">
+                #{item}
+            </foreach>
+            And is_delete = 0
+    </select>
+<!--    <insert id="directAddSchedule" parameterType="java.util.List">-->
+<!--        INSERT INTO tid_schedule_detail-->
+<!--		    (id,user_jifen_id,user_ding_id,user_name,user_code,plan_id,plan_check_time,group_id,class_setting_id,class_id,check_type,create_time)-->
+<!--		    <foreach collection="scheduleDetailEntityList" index="index" item="item" open="(" close=")" separator =",">-->
+<!--			SELECT-->
+<!--				#{item.id} as id,-->
+<!--                id as user_jifen_id,-->
+<!--				ding_id as user_ding_id,-->
+<!--                user_name as user_name,-->
+<!--				user_code as user_code,-->
+<!--                #{item.planId} as plan_id,-->
+<!--                #{item.planCheckTime} as plan_check_time,-->
+<!--                #{item.groupId} as group_id,-->
+<!--                #{item.classSettingId} as class_setting_id,-->
+<!--                #{item.classId} as class_id,-->
+<!--                #{item.checkType} as check_type,-->
+<!--                NOW() as create_time-->
+<!--            FROM-->
+<!--                tc_allusers-->
+<!--            WHERE-->
+<!--                ding_id = #{item.userId}-->
+<!--            </foreach>-->
+<!--    </insert>-->
+</mapper>

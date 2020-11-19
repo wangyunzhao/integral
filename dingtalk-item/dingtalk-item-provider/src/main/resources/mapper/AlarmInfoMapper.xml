@@ -1,0 +1,318 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<!--
+ * 查询或更新告警表信息
+ * @author 王云召
+ * @version 0.0.2
+ * @since 0.0.2 2019-03-06 15:43:42
+-->
+<mapper namespace="com.dmsdbj.integral.dingtalk.provider.dao.AlarmInfoDao">
+    <select id="queryOrgazitionIdByUserId" resultType="java.lang.String">
+		SELECT
+			a.organization_id
+		FROM
+			tc_organization_user a,tc_organization b
+		WHERE
+			a.organization_id = b.id
+			AND a.user_id = #{userId}
+			AND a.company_id = "23VAJAVAXT492QKFsfUBru"
+			AND b.p_id ="NV5onqoiU3Pmf8yojccaCk"
+			AND a.is_delete = 0
+			AND b.is_delete = 0
+	</select>
+    <select id="queryAlarmInfo" resultType="com.dmsdbj.integral.dingtalk.model.AlarmInfoModel">
+		SELECT
+			handle.id,
+			detail.id AS alarmId,
+			detail.user_name,
+			detail.remark,
+			handle.operate_result AS result
+		FROM
+			`tid_alarm_detail` detail
+			LEFT JOIN tid_alarm_handle handle ON detail.id = handle.alarm_id
+		WHERE
+			detail.orgazition = #{orgazitionId}
+			AND is_handle = 0
+			AND operator_type = 1
+			AND DATE_FORMAT( detail.create_time, '%Y-%m-%d' ) = DATE_FORMAT( NOW( ), '%Y-%m-%d' )
+			AND handle.is_delete = 0
+
+	</select>
+
+    <select id="getUserIdByDingId" resultType="java.lang.String">
+		SELECT
+			id
+		FROM
+			tc_allusers
+		WHERE
+			is_delete = 0
+		AND ding_id = #{dingId}
+
+	</select>
+	<select id="getUserNameByDingId" resultType="java.lang.String">
+		SELECT
+			user_name
+		FROM
+			tc_allusers
+		WHERE
+			is_delete = 0
+		AND ding_id = #{dingId}
+
+	</select>
+
+
+	<select id="queryOperatorType" resultType="java.lang.String">
+		SELECT
+			type
+		FROM
+			tid_type_user
+		WHERE
+			user_ding_id = #{operateType}
+		AND is_delete =0
+	</select>
+
+	<update id="updateAlarmIsSaveById" >
+			UPDATE tid_alarm_detail
+			SET is_safe = #{isSave},
+
+			update_time = NOW( )
+			WHERE
+				id = #{alarmId}
+				AND is_delete = 0
+	</update>
+	<update id="handleAlarmInfoByOperator" parameterType="com.dingtalk.item.pojo.AlarmHandleEntity">
+		UPDATE tid_alarm_handle
+		SET operate_result = #{operateResult},
+		is_handle = 1,
+		operator_name = #{operatorName},
+		operator_ding_id = #{operatorDingId},
+		update_time = NOW( )
+		WHERE
+			id = #{id}
+			AND is_delete = 0
+	</update>
+    <update id="updateAlarmIsSend">
+
+        UPDATE tid_alarm_detail
+        <set>
+            is_send=1,
+            update_time=now(),
+            send_time=now()
+        </set>
+        WHERE
+        is_send=0
+        AND
+        is_delete=0
+
+    </update>
+    <update id="updateAlarmIsSendToTeacher">
+        UPDATE tid_alarm_detail
+        <set>
+            is_send=2,
+            update_time=now()
+        </set>
+        WHERE
+        is_send=1
+        AND
+        is_delete=0
+
+    </update>
+	<update id="updateAlarmIsPast">
+		UPDATE
+		tid_alarm_detail
+		SET
+		is_past=1
+		WHERE
+		is_past=0
+		And is_delete=0
+	</update>
+
+
+	<!--根据钉钉id 多表联查用户的积分id，姓名，组织机构id   —— fjx —— 2020年6月8日09:20:37-->
+    <select id="selectAll" resultType="com.dingtalk.item.pojo.AlarmDetailEntity" parameterType="java.lang.String">
+        SELECT
+        SELECT
+        s.user_jifen_id,
+        s.user_ding_id,
+        s.user_name,
+        a.organization_id as orgazition
+        FROM
+        tid_schedule_detail s
+        JOIN tid_approve_detail a ON s.user_ding_id = a.originator_userid
+        WHERE
+        s.user_ding_id = #{ding_Id}
+    </select>
+    <select id="selectAllRule" resultType="com.dingtalk.item.pojo.GradeRuleEntity">
+		SELECT
+		rule_name,time_result
+		FROM
+		tid_grade_rule
+		WHERE
+		is_delete=0
+
+	</select>
+    <select id="queryTodayAllInfoToTeacher" resultType="com.dingtalk.item.pojo.AlarmDetailEntity">
+	SELECT
+	*
+	FROM
+	tid_alarm_detail
+	WHERE
+	is_send=1
+	AND
+	is_delete=0
+	AND
+	 DATE_FORMAT( send_time, '%Y-%m-%d' ) = DATE_FORMAT( NOW(), '%Y-%m-%d' )
+
+	</select>
+    <select id="queryOrgNameByChatId" resultType="java.lang.String">
+		select
+		group_name
+		FROM
+		tid_alarm_group
+		where group_id=#{chatId}
+		AND is_delete=0
+	</select>
+    <select id="queryOrgJiWeiName" resultType="java.lang.String">
+		SELECT
+			user_name
+		FROM
+			tc_allusers
+		WHERE
+			id = (
+				SELECT
+					user_id
+				FROM
+					tc_organization_user
+				WHERE
+					organization_id = ( SELECT id FROM tc_organization WHERE organization_name LIKE #{orgName}"%"
+					AND p_id = 'Tvmf3HVSPR7QT5JDKrQyKH' AND is_delete = 0 )
+					AND is_delete = '0'
+					AND `status` IS NULL
+					)
+					AND is_delete = 0
+
+	</select>
+	<!--曹祥铭-根据组织机构ID查询组织机构名-->
+	<select id="queryOrgNameByOrgId" resultType="java.lang.String">
+		SELECT group_name
+		FROM tid_alarm_group
+		WHERE organization_id =#{orgId}
+		And is_delete=0
+	</select>
+
+	<insert id="insertAlarmInfo" parameterType="java.util.List">
+        INSERT INTO `tid_alarm_detail` (
+        `user_ding_id`,
+        `user_jifen_id`,
+        `user_name`,
+        `is_leave`,
+        `is_send`,
+        `is_delete`,
+        `remark`,
+        `orgazition`
+        )
+        VALUES
+        <foreach collection="alarmDetailEntity" item="item" separator=",">
+            (#{item.user_ding_id},
+            #{item.user_jifen_id},
+            #{item.user_name},
+            1,
+            0,
+            0,
+            #{item.remark},
+            #{item.orgazition})
+        </foreach>
+    </insert>
+	<insert id="insertAlarmHandel">
+		INSERT INTO
+		tid_alarm_handle
+		(id,alarm_id,operator_ding_id,operator_name,operator_type,operate_result)
+		VALUES
+		(#{id},#{alarmId},#{operatorDingId},#{operatorName},#{operatorType},#{operateResult})
+	</insert>
+
+	<select id="queryAlarmHandleByAlarmId" resultType="com.dmsdbj.integral.dingtalk.model.AlarmHandleModel">
+		SELECT
+			alarm_id,operator_ding_id,operator_name,operate_result,is_handle
+		from
+			tid_alarm_handle
+		where alarm_id=#{alarmId}
+			And operator_type=1
+			And is_delete=0
+  </select>
+<!-- 查询is_send=3的数据，给米老师看-->
+	<select id="queryToHighest" resultType="com.dingtalk.item.pojo.AlarmDetailEntity">
+	SELECT
+	*
+	FROM
+	tid_alarm_detail
+	WHERE
+	is_send=3
+	AND
+	is_delete=0
+	AND
+	 DATE_FORMAT( send_time, '%Y-%m-%d' ) = DATE_FORMAT( NOW(), '%Y-%m-%d' )
+
+	</select>
+	<!-- 董可-查询第二级的处理人-->
+	<select id="queryLower" resultType="java.lang.String">
+		SELECT
+		user_name
+		FROM
+		tc_allusers
+		WHERE
+		ding_id =(SELECT
+		user_ding_id
+		FROM
+		tid_type_user ttu
+		WHERE
+		ttu.type = 3)
+	</select>
+
+	<!--董可-发送给最高级处理人之后，更新告警考勤表-->
+	<update id="updateAlarmSendToHighest" >
+        UPDATE tid_alarm_detail
+        <set>
+            is_send=4,
+            update_time=now()
+        </set>
+        WHERE
+        is_send=3
+        AND
+        is_delete=0
+
+    </update>
+<!--发送完消息后更新handle表-->
+	<insert id="updateHandleSendToHighest">
+		INSERT INTO
+		tid_alarm_handle
+		(id,alarm_id,operator_ding_id,operator_name,operator_type,operate_result)
+		VALUES
+		(#{id},#{alarmId},#{operatorDingId},#{operatorName},#{operatorType},#{operateResult})
+	</insert>
+<!--董可-获取【发送给谁】这个人的名字-->
+	<select id="queryDingNameToSend" resultType="java.lang.String">
+		SELECT
+		user_name
+		FROM
+		tc_allusers
+		WHERE
+		ding_id = (SELECT
+		user_ding_id
+		FROM
+		tid_type_user ttu
+		WHERE
+		ttu.type = 3)
+	</select>
+
+	<!--董可-获取发送给三级这个人的dingID -->
+	<select id="queryDingIdToSend" resultType="java.lang.String">
+		SELECT
+		user_ding_id
+		FROM
+		tid_type_user ttu
+		WHERE
+		ttu.type = 3
+	</select>
+</mapper>

@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.dmsdbj.integral.dingtalk.provider.dao.MonthReportDao">
+
+    <!--查询违纪与请假-崔晓鸿-2020年6月8日09:47:27-->
+    <select id="selectMonthReport" resultType="com.dmsdbj.integral.dingtalk.model.MonthReportModel">
+        SELECT DISTINCT
+        users.ding_id AS dingId,
+        users.user_name AS userName,
+        IFNULL( tdisobedient.disobedientNum, '0' ) AS disobedientNum,
+        IFNULL( tdisobedient.disobedientReason, '' ) AS disobedientReason,
+        IFNULL( tleave.leaveNum, '0' ) AS leaveNum,
+        IFNULL( tleave.leaveType, '' ) AS leaveType,
+        IFNULL( tleave.leaveTime, '0' ) AS leaveTime,
+        IFNULL( tleave.leaveReason, '' ) AS leaveReason
+        FROM
+        tc_allusers users
+        LEFT JOIN tc_organization_user organization ON organization.user_id = users.id and users.is_delete=0
+        LEFT JOIN (
+        SELECT
+        result.user_ding_id AS dingId,
+        count( * ) AS disobedientNum,
+        GROUP_CONCAT( rule.rule_name SEPARATOR '；' ) AS disobedientReason
+        FROM
+        tid_punch_result result
+        LEFT JOIN tid_grade_rule rule ON result.time_result = rule.time_result
+        WHERE
+        result.time_result != 'OnDutyNormal'
+        AND result.time_result != 'OffDutyNormal'
+        AND result.time_result != 'Leave'
+        AND result.create_time BETWEEN #{startTime}
+        AND #{endTime}
+        GROUP BY
+        result.user_ding_id
+        ) tdisobedient ON tdisobedient.dingId = users.ding_id
+        LEFT JOIN (
+        SELECT
+        originator_userid AS dingId,
+        count( * ) AS leaveNum,
+        group_concat( leave_type SEPARATOR '；' ) AS leaveType,
+        floor( sum( TIMESTAMPDIFF( MINUTE, start_time, end_time ) ) / 60 ) AS leaveTime,
+        group_concat( remark SEPARATOR '；' ) AS leaveReason
+        FROM
+        tid_approve_detail
+        WHERE
+        create_time BETWEEN #{startTime} AND #{endTime}
+        GROUP BY
+        originator_userid
+        ) tleave ON tleave.dingId = users.ding_id
+        <if test = "organizationId!=null" >
+            WHERE
+            organization.organization_id = #{organizationId}
+        </if>
+        ORDER BY
+        tdisobedient.disobedientNum DESC
+    </select>
+
+</mapper>

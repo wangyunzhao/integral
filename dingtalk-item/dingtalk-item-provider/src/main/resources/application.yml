@@ -1,0 +1,136 @@
+#eureka:
+#  client:
+#    fetch-registry: true
+#    service-url:
+#      defaultZone: http://points1.dmsd.tech:10086/eureka/
+#  instance:
+#    lease-expiration-duration-in-seconds: 15
+#    lease-renewal-interval-in-seconds: 5
+#mybatis-plus:
+#  global-config:
+#    db-config:
+#      id-type: ID_WORKER_STR
+#      logic-delete-value: 1
+#      logic-not-delete-value: 0
+#    mapUnderscoreToCamelCase: true
+#  mapper-locations: classpath:mapper/*.xml
+#permission:
+#  allschedule: https://oapi.dingtalk.com/topapi/attendance/listschedule?access_token=
+#  approvaldetails: https://oapi.dingtalk.com/topapi/processinstance/get?access_token=
+#  punchresult: https://oapi.dingtalk.com/attendance/list?access_token=
+#  qiyepunchresult: https://oapi.dingtalk.com/topapi/attendance/schedule/result/listbyids?access_token=
+#  sendmessage: https://oapi.dingtalk.com/chat/send?access_token=
+#testcontent: cuixiaohong
+#server:
+#  port: 8082
+#  servlet:
+#    context-path: /dingtalk
+#spring:
+#  application:
+#    name: integral-dingtalk-provider
+#  datasource:
+#    type: com.alibaba.druid.pool.DruidDataSource
+#    driver-class-name: com.p6spy.engine.spy.P6SpyDriver
+#    url: jdbc:p6spy:mysql://d-mysql.dmsd.tech:3306/integral_dingtalk_dev?autoReconnect=true&useSSL=false&characterEncoding=utf-8&serverTimezone=Asia/Shanghai&allowMultiQueries=true
+#    username: jifen
+#    password: jifen
+#    druid:
+#      initial-size: 2
+#      min-idle: 2
+#      max-active: 50
+#      validation-query: SELECT 1
+#      test-while-idle: true
+#      aop-patterns: com.tfjybj.physical.*
+#      stat-view-servlet:
+#        url-pattern: /druid/*
+#        reset-enable: true
+#        login-username: druid
+#        login-password: druid
+#  rabbitmq:
+#    host: 192.168.60.67
+#    username: guest
+#    password: guest
+#    virtual-host: /
+#xxl:
+#  job:
+#    admin:
+#      addresses: http://d-job.tfjybj.cn:8081/job-admin-dev/toLogin
+#    executor:
+#      appname: integralV3-job
+#      ip:
+#      port: 9981
+#      logpath: /data/xxl-job/jobhandler
+#      logretentiondays: -1
+#    accessToken:
+
+
+#mybatis-plus:
+#  global-config:
+#    db-config:
+#      id-type: ID_WORKER_STR
+#      logic-delete-value: 1
+#      logic-not-delete-value: 0
+#    mapUnderscoreToCamelCase: true
+#  mapper-locations: classpath:mapper/*.xml
+#permission:
+#  allschedule: https://oapi.dingtalk.com/topapi/attendance/listschedule?access_token=
+#  approvaldetails: https://oapi.dingtalk.com/topapi/processinstance/get?access_token=
+#  punchresult: https://oapi.dingtalk.com/attendance/list?access_token=
+#  qiyepunchresult: https://oapi.dingtalk.com/topapi/attendance/schedule/result/listbyids?access_token=
+#  sendmessage: https://oapi.dingtalk.com/chat/send?access_token=
+#AppKey: dingt452prfmxlwv9dsx
+#AppSecret: HojvOyIB0eVdmLurfK4d8RNkxO_2JviKyT4MsKkpWVt81NkKRiP0Q0X_gXQlCKR-
+#testcontent: cuixiaohong
+#server:
+#  port: 8082
+#  servlet:
+#   context-path: /dingtalk
+#spring:
+#  application:
+#    name: integral-dingtalk-provider
+#  datasource:
+#    type: com.alibaba.druid.pool.DruidDataSource
+#    driver-class-name: com.p6spy.engine.spy.P6SpyDriver
+#    url: jdbc:p6spy:mysql://d-mysql.dmsd.tech:3306/integral_dingding_dev?autoReconnect=true&useSSL=false&characterEncoding=utf-8&serverTimezone=Asia/Shanghai&allowMultiQueries=true
+#    username: ding
+#    password: ding
+#    druid:
+#      initial-size: 2
+#      min-idle: 2
+#      max-active: 50
+#      validation-query: SELECT 1
+#      test-while-idle: true
+#      aop-patterns: com.tfjybj.physical.*
+#      stat-view-servlet:
+#        url-pattern: /druid/*
+#        reset-enable: true
+#        login-username: druid
+#        login-password: druid
+#  rabbitmq:
+#    host: 192.168.60.67
+#    username: guest
+#    password: guest
+#    virtual-host: /
+#xxl:
+#  job:
+#    admin:
+#      addresses: http://xxljob.dmsd.tech:8081/job-admin-prod/toLogin
+#    executor:
+#      appname: integralV3-job
+#      ip:
+#      port: 9981
+#      logpath: /data/xxl-job/jobhandler
+#      logretentiondays: -1
+#    accessToken:
+#monthReport:
+#  excelTitle: 姓名,违纪次数,违纪原因,请假次数,请假类型,请假累计时间（小时）,请假原因描述
+#  excelFileName: "请假统计.xls"
+#  excelSheetName: "请假统计"
+#
+#secondAlarm:
+#  wednesday: 星期三
+#  friday: 星期五
+#  time: 08:00:00,10:00:00,13:00:00,14:00:00,16:45:00
+
+
+

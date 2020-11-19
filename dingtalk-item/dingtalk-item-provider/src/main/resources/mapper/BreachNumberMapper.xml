@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.dmsdbj.integral.dingtalk.provider.dao.BreachNumberDao">
+    <insert id="insertBreachNumber" parameterType="com.dingtalk.item.pojo.BreachNumberEntity">
+        insert into
+        tid_breach_number(id,user_jifen_id,breach_number_sum,remark,create_time,update_time,is_delete)
+        values
+        <foreach collection="breachNumberEntityList" item="item" separator=",">
+            (#{item.id},#{item.userJifenId},#{item.breachNumberSum},"",now(),now(),0)
+        </foreach>
+    </insert>
+
+    <update id="updateDeleteBreachNumber" parameterType="com.dingtalk.item.pojo.BreachNumberEntity">
+        update tid_breach_number
+        set is_delete = 1
+        where id in
+        <foreach collection="breachNumberEntityList" item="item" open="(" close=")" separator=",">
+            #{item.id}
+        </foreach>
+    </update>
+
+    <update id="updateNumberBreachNumber" parameterType="com.dmsdbj.integral.dingtalk.model.BreachNumberModel">
+        <foreach collection="breachNumberModelList" item="item" separator=";">
+            update tid_breach_number
+            set breach_number_sum = breach_number_sum+#{item.breachNumberSum}
+            where id =#{item.breachNumberEntity.id}
+        </foreach>
+    </update>
+
+    <update id="updateDeleteAllBreachNumber">
+        update tid_breach_number
+        set is_delete = 1
+    </update>
+</mapper>

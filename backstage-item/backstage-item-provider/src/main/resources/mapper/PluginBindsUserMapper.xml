@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="com.dmsdbj.integral.backstage.provider.dao.PluginBindsUserDao">
+
+    <select id="selectPluginBindsUser" resultType="com.dmsdbj.integral.backstage.model.PluginBindsUserModel">
+        SELECT
+            ding_id,
+            user_name as name
+        FROM
+            tc_allusers
+        WHERE
+            id IN (SELECT user_id FROM `tik_plugin_user` WHERE plugin_id = #{pluginId}) and is_delete = 0
+    </select>
+
+    <insert id="insertPluginBindsUser" parameterType="com.dmsdbj.integral.backstage.pojo.PluginUserEntity">
+        INSERT INTO tik_plugin_user
+        (id, plugin_id, user_id, create_time, creator, update_time, operator )
+        <foreach collection="pluginUserEntities" item="item" index="index" separator="UNION">
+            SELECT
+            #{item.id} AS id,
+            #{item.pluginId} AS plugin_id,
+            ( SELECT a.id FROM tc_allusers a WHERE a.ding_id = #{item.userId} AND a.is_delete = 0 ) AS user_id,
+            NOW() AS create_time,
+            #{item.operator} AS creator,
+            NOW() AS update_time,
+            #{item.operator} AS operator
+        </foreach>
+    </insert>
+
+
+    <delete id="deletePluginBindsUser" parameterType="com.dmsdbj.integral.backstage.pojo.PluginUserEntity">
+        <foreach collection="pluginUserEntities" item="item" index="index" separator =";" >
+            DELETE FROM tik_plugin_user
+            WHERE
+            plugin_id=#{item.pluginId}
+            and
+            user_id =(SELECT id
+            FROM
+            tc_allusers
+            WHERE ding_id = #{item.userId})
+        </foreach>
+    </delete>
+
+</mapper>

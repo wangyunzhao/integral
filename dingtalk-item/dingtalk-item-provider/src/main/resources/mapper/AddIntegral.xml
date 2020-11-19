@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<!--
+ * 钉钉考勤加分之前需要计算分值
+ * @author 王云召
+ * @version 0.0.2
+ * @since 0.0.2 2019-03-06 15:43:42
+-->
+<mapper namespace="com.dmsdbj.integral.dingtalk.provider.dao.AddIntegralDao">
+
+    <update id="caluIntegral">
+		UPDATE tid_punch_result a
+		INNER JOIN tid_grade_rule b ON a.time_result = b.time_result
+		AND DATE_FORMAT( a.base_check_time, '%Y-%m-%d' ) = #{date}
+		AND a.is_delete = 0
+		AND b.is_delete = 0
+		AND a.is_calculate = 0
+		SET a.integral = b.integral,
+		a.is_calculate = 1,
+		a.calculate_time = NOW( ),
+		a.update_time = NOW( )
+	</update>
+	<update id="caluHandleInfoIntegral" parameterType="java.lang.Integer">
+		<if test="addIntegral gt 0">
+			UPDATE tid_alarm_handle a
+			INNER JOIN tid_alarm_detail b ON b.id = a.alarm_id 	AND (LEFT(b.remark,2)  = "上班" or  b.remark LIKE "%迟到%" or  b.remark LIKE "%早退%")
+			SET
+			a.integral = #{addIntegral},
+			a.is_calu = 1
+			WHERE
+			a.is_handle != 0
+			AND a.is_delete = 0
+			AND a.operator_type = 1
+			AND a.operator_ding_id != 0
+			AND a.is_calu = 0;
+
+		</if>
+		<if test="minusIntegral lt 0">
+			UPDATE tid_alarm_handle a
+			INNER JOIN tid_alarm_detail b ON b.id = a.alarm_id 	AND (LEFT(b.remark,2)  = "上班" or  b.remark LIKE "%迟到%" or  b.remark LIKE "%早退%")
+			SET
+			a.integral = #{minusIntegral},
+			a.is_calu = 1
+			WHERE
+			a.is_handle = 0
+			AND a.is_delete = 0
+			AND a.operator_type = 1
+			AND a.operator_ding_id != 0
+			AND a.is_calu = 0;
+		</if>
+	</update>
+
+	<select id="queryHandleAlarmIntegralData" resultType="com.dmsdbj.integral.dingtalk.model.AddIntegralDataModel">
+		SELECT
+			a.id,
+			b.id AS userId,
+			a.integral AS integral,
+			"纪委处理告警消息" as reason
+		FROM
+			tid_alarm_handle a
+			LEFT JOIN tc_allusers b ON b.ding_id = a.operator_ding_id
+			AND b.is_delete = 0
+		WHERE
+			is_calu = 1
+			AND is_success = 0
+			AND operator_type = 1
+			AND operator_ding_id != 0
+	</select>
+
+    <select id="queryAddIntegralData" resultType="com.dmsdbj.integral.dingtalk.model.AddIntegralDataModel">
+		SELECT
+			a.id,
+			a.user_jifen_id AS userId,
+			a.integral,
+			b.rule_name AS reason
+		FROM
+			(SELECT * FROM tid_punch_result WHERE DATE_FORMAT( base_check_time, '%Y-%m-%d' ) = DATE_FORMAT( #{date}, '%Y-%m-%d' ) AND is_delete = 0 ) a
+			INNER JOIN tid_grade_rule b ON a.time_result = b.time_result
+		WHERE
+			b.is_delete = 0
+			AND is_success = 0
+			AND is_calculate = 1
+	</select>
+
+	<update id="updateIsSuccess">
+		<foreach collection="addIntegralDatas" item="item" index="index" open="" close="" separator=";">
+			update tid_punch_result
+			<set>
+				is_success = 1,
+				update_time = now(),
+				success_time = now()
+			</set>
+			where id = #{item.id}
+		</foreach>
+	</update>
+	<update id="updateIsHandSuccess">
+		<foreach collection="handleAlarmIntegralDatas" item="item" index="index" open="" close="" separator=";">
+			update tid_alarm_handle
+			<set>
+				is_success = 1,
+				update_time = now()
+			</set>
+			where id = #{item.id}
+		</foreach>
+	</update>
+<select id="queryAddIntegralAfterSuccess" resultType="com.dmsdbj.integral.dingtalk.model.AddIntegralDataModel">
+		SELECT
+			*
+		FROM
+			(
+		SELECT
+			operator_ding_id AS userid,
+			SUM( integral ) AS integral
+		FROM
+			`tid_alarm_handle`
+		WHERE
+			is_success = 1
+			AND DATE_FORMAT( update_time, '%Y-%m-%d' ) = #{date}
+			AND operator_ding_id != 0
+			AND is_delete = 0
+		GROUP BY
+			operator_ding_id
+			) a
+		WHERE
+			a.integral != 0
+
+</select>
+</mapper>

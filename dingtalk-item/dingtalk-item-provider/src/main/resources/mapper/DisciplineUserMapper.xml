@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.dmsdbj.integral.dingtalk.provider.dao.DisciplineUserDao">
+    <!--插入到DisciplineUser表-->
+    <insert id="insertDiscipline" parameterType="java.util.List">
+        INSERT INTO
+        tid_discipline_user(id,user_ding_id,user_name,level_num,organization_id)
+        VALUES
+        <foreach collection="disciplineUserEntity" item="item" separator=",">
+            (#{item.id},#{item.userDingId},#{item.userName},#{item.levelNum},
+             #{item.organizationId})
+        </foreach>
+    </insert>
+    <delete id="deleteDisciplineUser">
+        DELETE
+        FROM
+	    tid_discipline_user
+    </delete>
+    <!--根据钉钉id查询组织id-->
+    <select id="queryOrganation" parameterType="java.lang.String" resultType="java.lang.String">
+    SELECT
+	organizationUser.organization_id
+    FROM
+	tc_organization_user organizationUser
+	LEFT JOIN tc_organization organization ON organization.id = organizationUser.organization_id
+    WHERE
+	organizationUser.user_id = ( SELECT id FROM tc_allusers WHERE ding_id = #{dingId} )
+	AND organizationUser.company_id = '23VAJAVAXT492QKFsfUBru'
+	AND organizationUser.is_delete = 0
+	AND organization.p_id = 'NV5onqoiU3Pmf8yojccaCk'
+    </select>
+    <select id="queryUserInfoByOrgId" resultType="com.dingtalk.item.pojo.DisciplineUserEntity">
+        SELECT
+        *
+        FROM
+        tid_discipline_user
+        WHERE
+        organization_id=#{orgId}
+        AND
+        is_delete=0
+        Order by
+        create_time
+        desc
+        limit 0, 1
+    </select>
+    <!--查询DisciplineUser表是否有数据-->
+    <select id="queryDisciplineUser" resultType="com.dingtalk.item.pojo.DisciplineUserEntity">
+        SELECT
+     	*
+        FROM
+	    `tid_discipline_user`
+    </select>
+</mapper>

@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.dmsdbj.integral.dingtalk.provider.dao.ResultFilteringDao">
+    <!--批量插入打卡结果-->
+    <insert id="insertResultFiltering" parameterType="com.dingtalk.item.pojo.PunchResultEntity">
+        INSERT  INTO
+        tid_punch_result (id,user_jifen_id,user_ding_id,base_check_time,user_check_time,check_type,time_result,group_id,location_result,record_id,proc_inst_id)
+        VALUES
+        <foreach collection="punchResultEntityList" item="item" separator=",">
+            (#{item.id},#{item.userJifenId},#{item.userId},#{item.baseCheckTime},#{item.userCheckTime},#{item.checkType},#{item.timeResult},#{item.groupId},#{item.locationResult},#{item.recordId},#{item.procInstId})
+        </foreach>
+    </insert>
+
+    <select id="queryUserNameByUserDingId" resultMap="queryMap">
+        SELECT
+        ding_id as'key',user_name as 'value'
+        FROM
+        tc_allusers
+        WHERE
+        ding_id
+        IN
+        <foreach collection="punchResultEntityList" index="index" item="item" open="("
+                 separator="," close=")">
+            #{item.userId}
+        </foreach>
+        And
+        is_delete=0
+    </select>
+    <select id="queryOrganizationIdByUserId" resultMap="queryMap" >
+        SELECT
+        user_id as 'key',organization_id as 'value'
+        FROM
+        tc_organization_user a, tc_organization b
+        WHERE
+        user_id
+        IN
+        <foreach collection="punchResultEntityList"  index="index" item="item" open="("
+                 separator="," close=")">
+            #{item.userJifenId}
+        </foreach>
+        AND a.company_id = "23VAJAVAXT492QKFsfUBru"
+        AND b.p_id ="NV5onqoiU3Pmf8yojccaCk"
+        AND a.is_delete = 0
+        AND b.is_delete = 0
+        And
+        a.organization_id=b.id
+    </select>
+    <select id="queryNotSendMessage" resultType="com.dingtalk.item.pojo.AlarmDetailEntity">
+        SELECT
+        *
+        FROM
+        tid_alarm_detail
+        WHERE
+        is_send=0
+        AND
+        is_delete=0
+
+    </select>
+    <!--根据组织机构id查询群id-->
+    <select id="queryOrgChatId" resultType="java.lang.String">
+        SELECT
+        group_id
+        FROM
+        tid_alarm_group
+        WHERE
+        organization_id =#{orgId}
+        AND
+        is_delete=0
+    </select>
+    <resultMap id="queryMap" type="com.dmsdbj.integral.dingtalk.model.MapModel">
+        <result property="key" column="key"></result>
+        <result property="value" column="value"></result>
+    </resultMap>
+    <!--根据钉钉ID查询积分ID-->
+    <select id="queryUserJiFenIdByDing" resultMap="queryMap" >
+        SELECT
+        ding_id as 'key',id as 'value'
+        FROM
+        tc_allusers
+        WHERE
+        ding_id
+        IN
+        <foreach collection="punchResultEntityList"   item="item" open="("
+                 separator="," close=")">
+            #{item.userId}
+        </foreach>
+        AND
+        is_delete=0
+    </select>
+    <!--向告警表中插入数据-->
+    <insert id="insertAlarmDetail">
+        INSERT INTO
+        tid_alarm_detail(id,user_ding_id,user_jifen_id,user_name,remark,orgazition,is_leave)
+        VALUES
+        <foreach collection="alarmDetailEntityList" item="item" separator=",">
+            (#{item.id},#{item.userDingId},#{item.userJifenId},#{item.userName},#{item.remark},#{item.orgazition},0)
+        </foreach>
+
+    </insert>
+    <!--更新告警表中的历史数据-->
+
+</mapper>

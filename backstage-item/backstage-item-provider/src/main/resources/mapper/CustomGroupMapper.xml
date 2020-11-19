@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="com.dmsdbj.integral.backstage.provider.dao.CustomGroupDao">
+
+    <insert id="addCustomGroup" parameterType="com.dmsdbj.integral.backstage.pojo.CustomGroupEntity">
+        INSERT tik_custom_group
+            ( id, ding_id, `name`, group_name, creator, create_time, update_time, operator)
+        VALUES
+        <foreach collection="list" item="item" separator=",">
+	        (#{item.id},#{item.dingId},#{item.name},#{item.groupName},#{item.name},NOW(),NOW(),#{item.name})
+        </foreach>
+    </insert>
+    <update id="updateDeleteCustomGroup" parameterType="String">
+        UPDATE tik_custom_group
+        SET
+            is_delete = 1
+        WHERE
+            group_name = #{groupName}
+    </update>
+    <select id="selectGroupName" resultType="String">
+        SELECT DISTINCT
+            group_name
+        FROM
+            `tik_custom_group`
+    </select>
+
+    <select id="selectGroupByGroupName" resultType="com.dmsdbj.integral.backstage.model.PluginBindsUserModel">
+        SELECT
+            ding_id,
+            `name`
+        FROM
+            `tik_custom_group`
+        WHERE
+            group_name= #{groupName}
+    </select>
+
+</mapper>

@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<!--
+ * @author 马珂
+ * @version 1.0
+ * @date 2020/8/12 10:27
+ * @describe 特定人员加分Mapper
+-->
+<mapper namespace="com.dmsdbj.integral.backstage.provider.dao.SpecificPointsDao">
+    <!--根据类型查询所有可赠积分记录-->
+    <select id="querySpecificPoints" resultType="com.dmsdbj.integral.backstage.model.SpecificPointsModel">
+        select id,`name`,integral,type
+        from tik_specific_points
+        where type=#{type}  and is_delete=0
+    </select>
+
+    <!--根据类型模糊搜索-->
+    <select id="likeQuerySpecificPoints" resultType="com.dmsdbj.integral.backstage.model.SpecificPointsModel">
+        <bind name="content" value="'%'+content+'%'"/>
+        select id,`name`,integral,type
+        from tik_specific_points
+        where type=#{type} and CONCAT(IFNULL(`id`,''),IFNULL(`name`,''),IFNULL(`integral`,'')) LIKE #{content}
+        and is_delete=0
+    </select>
+
+    <!--根据id软删除可赠积分记录-->
+    <delete id="deleteSpecificPoints" parameterType="com.dmsdbj.integral.backstage.model.SpecificPointsModel">
+        delete from tik_specific_points
+        where id in
+        <foreach collection="specificPointsModelSet" index="index" item="item" open="(" close=")" separator ="," >
+            #{item.id}
+        </foreach>
+        and is_delete=0
+    </delete>
+
+    <!--添加多条可赠积分记录-->
+    <insert id="addSpecificPoints" parameterType="com.dmsdbj.integral.backstage.model.SpecificPointsModel">
+        insert into tik_specific_points(id,name,integral,type,create_time,update_time,operator,is_delete)
+        values
+        <foreach collection="specificPointsModelSet" item="item" separator=",">
+            (#{item.id},#{item.name},#{item.integral},#{item.type},now(),now(),#{item.operator},0)
+        </foreach>
+    </insert>
+
+    <!--根据id更新可赠积分记录-->
+    <update id="updateSpecificPoints" parameterType="com.dmsdbj.integral.backstage.pojo.SpecificPointsEntity">
+    update tik_specific_points
+    set integral=#{integral},
+        operator=#{operator}
+    where id=#{id}  and is_delete=0
+    </update>
+</mapper>

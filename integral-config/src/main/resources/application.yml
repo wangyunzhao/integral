@@ -1,0 +1,34 @@
+server:
+  port: 10011
+spring:
+  application:
+    name: dingtalk-config
+  cloud:
+    config:
+      server:
+        git:
+          uri: http://git.dmsd.tech/integral/backend/config.git # git地址 https的
+          username: 15076159739@163.com # git账号
+          password: wangmengyao #git密码
+#          default-label: dev
+  rabbitmq:
+    host: 192.168.60.67
+    username: guest
+    password: guest
+    virtual-host: /
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:10086/eureka
+    registry-fetch-interval-seconds: 10
+  instance:
+    lease-renewal-interval-in-seconds: 5
+    lease-expiration-duration-in-seconds: 15
+    prefer-ip-address: true
+#    ip-address: 127.0.0.1
+    instance-id: ${spring.application.name}:${server.port}
+management:
+  endpoints:
+    web:
+      exposure:
+        include: bus-refresh

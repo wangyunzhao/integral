@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.dmsdbj.integral.dingtalk.provider.dao.AlarmHandleDao">
+    <select id="selectAlarmHandle" resultType="com.dmsdbj.integral.dingtalk.model.AlarmHandleResultModel">
+        SELECT
+            detail.id AS alarmId,
+            detail.user_jifen_id AS userId,
+            detail.user_name AS userName,
+            detail.remark AS userStatus,
+            detail.is_safe AS isSafe,
+            organization.organization_name AS userOrganization
+        FROM
+            `tid_alarm_detail` detail
+            LEFT JOIN tc_organization organization ON organization.id = detail.orgazition
+        WHERE
+            DATE_FORMAT( detail.create_time, '%Y-%m-%d' ) = DATE_FORMAT( CURDATE( ), '%Y-%m-%d' )
+            AND detail.is_delete =0
+            AND detail.is_past =0
+            <if test = "organizationId!=null" >
+                AND detail.orgazition = #{organizationId}
+            </if>
+    </select>
+
+    <select id="selectHandleResultByAlarmId" resultType="com.dmsdbj.integral.dingtalk.model.HandleResultModel">
+        SELECT
+            id AS operateId,
+            operator_name AS operatorName,
+            operator_type AS operatorType,
+            operate_result AS operateResult,
+            operator_ding_id AS operatorDingId,
+            is_handle AS isHandle
+        FROM
+            tid_alarm_handle
+        WHERE
+            alarm_id =#{alarmId}
+            AND is_delete = 0
+        ORDER BY
+	        operator_type
+    </select>
+
+    <select id="selectDisobedientByUserId" resultType="com.dmsdbj.integral.dingtalk.model.AlarmHandleResultModel">
+        SELECT
+            user_jifen_id AS userId,
+            count( * ) AS disobedientNum
+        FROM
+            tid_punch_result
+        WHERE
+            time_result != 'OnDutyNormal'
+            AND time_result != 'OffDutyNormal'
+            AND time_result != 'Leave'
+            AND DATE_FORMAT( create_time, '%Y%m' ) = DATE_FORMAT( CURRENT_DATE, '%Y%m' )
+            AND user_jifen_id = #{userId}
+            AND is_delete =0
+    </select>
+
+    <insert id="readWithOneClickByDingId">
+        INSERT INTO tid_alarm_handle ( id, alarm_id, operator_ding_id, operator_name, operator_type, operate_result,is_handle )
+        VALUES
+        <foreach collection="alarmHandleEntities" item="item" index="index" open="" close="" separator=",">
+            (#{item.id},#{item.alarmId},#{item.operatorDingId},#{item.operatorName},#{item.operatorType},#{item.operateResult},#{item.isHandle} )
+        </foreach>
+    </insert>
+
+    <!-- 查询当前提交人的等级-->
+    <select id="selectSubmitGrade" resultType="java.lang.String">
+        SELECT
+        type
+        FROM
+            `tid_type_user`
+        WHERE
+	    user_ding_id = #{dingId}
+	    AND is_delete=0
+    </select>
+    <!-- 根据钉钉id查询当前提交人的姓名-->
+    <select id="selectUserName" resultType="java.lang.String">
+        SELECT
+            user_name
+        FROM
+            `tc_allusers`
+        WHERE
+	    ding_id = #{dingId}
+	    AND is_delete=0
+    </select>
+    <!-- 更新IsSend字段为3-->
+    <update id="updateIsSend">
+        UPDATE tid_alarm_detail
+        SET is_send = 3
+        WHERE
+	    id = #{alarmId}
+    </update>
+    <update id="updateIsSafeByAlarmId">
+        UPDATE
+        tid_alarm_detail
+        SET
+        is_safe=#{isSafe}
+        WHERE
+        id =#{alarmId}
+    </update>
+    <!-- 将提交输入插入AlarmHandle表-->
+    <insert id="insertAlarmHandle">
+        INSERT tid_alarm_handle
+        ( id, alarm_id, operator_ding_id, operator_name, operator_type, operate_result,is_handle)
+        VALUES
+     	(#{id},#{alarmId},#{operatorDingId},#{operatorName},#{operatorType},#{operateResult},1)
+    </insert>
+    <select id="selectUserType" resultType="java.lang.String">
+        SELECT
+            type
+        FROM
+            tid_type_user
+        WHERE
+            user_ding_id = #{dingId}
+            and
+            is_delete = 0
+    </select>
+</mapper>

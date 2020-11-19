@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<!--
+ * @author 郝龙飞
+-->
+<mapper namespace="com.dmsdbj.integral.backstage.provider.dao.ProjectApproveDao">
+
+    <!--查询所有待审批的项目-->
+    <select id="queryProjectApprove" resultType="com.dmsdbj.integral.backstage.model.ProjectApproveModel">
+        select
+        id as id,
+        `name` as `name`,
+        english_name as englishName,
+        initiator as initiator
+        from tik_project_approval
+        where approval_status=0
+    </select>
+
+    <!--模糊查询待审批项目-->
+    <select id="queryProjectApproveLike" resultType="com.dmsdbj.integral.backstage.model.ProjectApproveModel">
+        select
+        id as id,
+        `name` as `name`,
+        english_name as englishName,
+        initiator as initiator
+        from tik_project_approval
+        where approval_status=0 and concat (`name`,english_name,initiator) like #{queryLikeInfo}"%"
+    </select>
+
+    <select id="queryEnglishName" resultType="string">
+        select
+        english_name as englishName
+        from tik_project_approval
+        where id=#{id} limit 1;
+    </select>
+
+    <!--更新审批状态-->
+    <update id="updateApproveStatus">
+        update tik_project_approval
+        set approval_status=1
+        where
+        id=#{id}
+    </update>
+
+
+<!--**************************tik_project表*************************************************-->
+
+    <!--根据english_name英文名称更新tik_project表中的exchange_rate兑换比例字段-->
+    <update id="updateProjectRate">
+        update tik_project
+        set exchange_rate=#{exchangeRate},
+            secret_id=#{secretId},
+            secret_key=#{secretKey}
+        where
+        english_name=#{englishName}
+    </update>
+
+<!--***************************************************************************************-->
+
+
+    <!--审批通过后更新的字段-->
+    <update id="updateApproveRemark">
+        update tik_project_approval
+        set approval_status=1,
+        remark=#{remark}
+        where
+        id=#{id}
+    </update>
+
+    <!--**************************tik_project表*************************************************-->
+
+    <!--根据english_name英文名称更新tik_project表中的exchange_rate兑换比例字段-->
+    <delete id="deleteProjectStatus">
+        delete from tik_project
+        where
+        english_name=#{englishName}
+    </delete>
+
+    <!--***************************************************************************************-->
+
+</mapper>

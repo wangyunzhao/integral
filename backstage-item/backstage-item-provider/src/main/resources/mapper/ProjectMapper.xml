@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="com.dmsdbj.integral.backstage.provider.dao.ProjectDao">
+
+    <!--添加项目-->
+    <insert id="addProject" parameterType="com.dmsdbj.integral.backstage.model.ProjectModel">
+        insert into tik_project(id,`name`,english_name,create_time,update_time,is_delete,operator)
+        values
+        (#{id},#{name},#{englishName},now(),now(),"0",#{operator})
+    </insert>
+
+    <insert id="addApproval" parameterType="com.dmsdbj.integral.backstage.pojo.ProjectApprovalEntity">
+        INSERT INTO tik_project_approval ( id,`name`,english_name,initiator, create_time, update_time,operator )
+        VALUES
+            (
+        #{projectApproval.id}, #{projectApproval.name},#{projectApproval.englishName},#{projectApproval.operator},now(),now(),#{projectApproval.operator})
+    </insert>
+
+    <!--添加项目判重-->
+    <select id="projectAddIsRepeat" resultType="com.dmsdbj.integral.backstage.pojo.ProjectEntity">
+        select `name`,english_name
+        from
+        tik_project
+        where
+        is_delete=0 and (`name`=#{name} or english_name= #{englishName})
+    </select>
+
+    <!--查询项目添加记录-->
+    <select id="projectAddRecord" resultType="com.dmsdbj.integral.backstage.pojo.ProjectEntity">
+        select id,`name`,english_name,secret_id,secret_key,exchange_rate
+        from
+        tik_project
+        where
+        is_delete=0
+        order by secret_id desc
+    </select>
+
+    <!--模糊搜索项目记录-->
+    <select id="searchProjectRecord" resultType="com.dmsdbj.integral.backstage.pojo.ProjectEntity">
+        select id,`name`,english_name,secret_id,secret_key,exchange_rate
+        from
+        tik_project
+        where
+        is_delete=0 and `name` like  concat (#{content},"%") or english_name like concat( #{content},"%")
+        order by secret_id desc
+    </select>
+
+    <!--删除项目-->
+    <update id="deleteProjectRecord" parameterType="com.dmsdbj.integral.backstage.model.ProjectModel">
+        update tik_project
+        set is_delete=1
+        where id in
+        <foreach collection="list" index="index" item="item" open="(" close=")" separator ="," >
+            #{item.id}
+        </foreach>
+    </update>
+
+    <!--编辑项目（普通项目组组长）-->
+    <update id="updateProjectName">
+        update tik_project
+        set `name`=#{name},
+        update_time=now()
+        where
+        id=#{id}
+    </update>
+
+    <!--编辑项目（有权限）-->
+    <update id="updateProjectPower">
+        update tik_project
+        set `name`=#{name},
+        exchange_rate=#{exchangeRate},
+        update_time=now()
+        where
+        id=#{id}
+    </update>
+
+    <!--编辑项目判重-->
+    <select id="projectEditIsRepeat" resultType="java.lang.Integer">
+        select count(*)
+        from
+        tik_project
+        where
+        `name`=#{name}
+        and id!=#{id}
+    </select>
+
+    <!--根据id查询项目名字  郝龙飞-->
+    <select id="projectName" resultType="com.dmsdbj.integral.backstage.model.ProjectNameModel">
+        select
+        `name` as `name`,
+        english_name as englishName
+        from
+        tik_project
+        where
+        id=#{id}
+    </select>
+
+    <!--返回所有项目名字和项目id  郝龙飞-->
+    <select id="projectNameId" resultType="com.dmsdbj.integral.backstage.model.ProjectNameIdModel">
+        select
+         id as id,
+         `name` as `name`,
+         english_name as englishName
+        from
+        tik_project
+        where
+        is_delete=0 and secret_id !="" and secret_key !=""
+    </select>
+</mapper>

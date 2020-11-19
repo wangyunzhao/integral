@@ -1,0 +1,31 @@
+spring:
+  application:
+    name: integral-backstage-provider
+  cloud:
+    config:
+      name: backstage
+      profile: dev
+      label: master
+      discovery:
+        enabled: true
+        service-id: DINGTALK-CONFIG
+#
+#eureka:
+#  client:
+#    service-url:
+#      defaultZone: http://points1:10086/eureka
+#    register-with-eureka: true
+#    fetch-registry: true
+eureka:
+  client:
+    fetch-registry: true
+    service-url:
+      defaultZone: http://points1.dmsd.tech:10086/eureka/
+    register-with-eureka: false
+  instance:
+    lease-expiration-duration-in-seconds: 15
+    lease-renewal-interval-in-seconds: 5
+
+
+
+

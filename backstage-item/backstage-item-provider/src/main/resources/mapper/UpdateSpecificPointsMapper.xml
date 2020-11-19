@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="com.dmsdbj.integral.backstage.provider.dao.UpdateSpecificPointsDao">
+    <!--
+        根据特定人员，更新可赠积分
+        void updateGivingIntegralWithId();
+    -->
+    <update id="updateGivingIntegralWithId">
+        UPDATE tik_user a
+        INNER JOIN (
+        SELECT
+          b.integral,
+          c.id
+        FROM
+          tik_specific_points b
+          LEFT JOIN tc_allusers c ON b.id = c.ding_id
+        WHERE
+          c.is_delete = 0
+          AND b.type = 1
+          AND b.is_delete = 0
+          ) d ON a.id = d.id
+          SET a.integral = a.integral + d.integral
+        WHERE
+          a.id = d.id
+    </update>
+
+    <!--
+    查询特定加分的部门
+    List<SpecificPointsEntity> selectDept();
+    -->
+    <select id="selectDept" resultType="com.dmsdbj.integral.backstage.pojo.SpecificPointsEntity">
+        SELECT
+            id,
+            integral
+        FROM
+            tik_specific_points
+        WHERE
+            type = 0
+            AND is_delete =0
+    </select>
+
+    <!--根据特定人员，更新可赠积分  int updateGivingIntegralWithDeptId(@Param("list") List<UserEntity> userEntities);-->
+    <update id="updateGivingIntegralWithDeptId" parameterType="com.dmsdbj.integral.backstage.pojo.UserEntity">
+        <foreach collection="list" item="item">
+            UPDATE tik_user c
+            INNER JOIN (
+            SELECT
+            a.id,
+            b.giving_integral
+            FROM
+            tik_user b
+            LEFT JOIN tc_allusers a ON a.id = b.id
+            WHERE
+            a.ding_id = #{item.dingId}
+            ) d
+            SET c.integral = c.integral + ${item.givingIntegral}
+            WHERE
+            c.id = d.id;
+        </foreach>
+
+    </update>
+</mapper>

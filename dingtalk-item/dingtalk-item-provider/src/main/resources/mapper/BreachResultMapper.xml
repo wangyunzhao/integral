@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.dmsdbj.integral.dingtalk.provider.dao.BreachResultDao">
+    <insert id="insertBreachResult" parameterType="com.dingtalk.item.pojo.BreachResultEntity">
+        INSERT INTO
+        tid_breach_result (id,user_jifen_id,integral,reason,breach_number,calculate_time,create_time,is_delete)
+        VALUES
+        <foreach collection="breachResultEntityList" item="item"  separator=",">
+            (#{item.id},#{item.userJifenId},#{item.integral},#{item.reason},#{item.breachNumber},NOW(),NOW(),0)
+        </foreach>
+    </insert>
+    <update id="updateBreachResultIsSuccess" parameterType="com.dingtalk.item.pojo.BreachResultEntity">
+        UPDATE
+        tid_breach_result
+        SET
+        is_success=1,
+        success_time = NOW()
+        WHERE
+        id in
+        <foreach collection="breachResultEntityList" item="item" open="(" close=")" separator=",">
+            #{item.id}
+        </foreach>
+    </update>
+</mapper>

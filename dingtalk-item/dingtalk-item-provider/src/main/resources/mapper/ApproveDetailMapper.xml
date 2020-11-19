@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<!--
+ * 根据审批模板，获取该模板下某个时间后的所有审批
+ * @author 王梦瑶
+ * @version 0.0.2
+ * @since 0.0.2 2019-03-06 15:43:42
+-->
+<mapper namespace="com.dmsdbj.integral.dingtalk.provider.dao.ApproveDetailDao">
+
+    <insert id="insertApproval" parameterType="java.util.List">
+        INSERT INTO
+        tid_approve_detail(id,process_instance_id,title,operate_create_time,operate_finish_time,originator_userid,leave_type,
+        status,start_time,end_time,result,organization_id,remark)
+        VALUES
+        <foreach collection="approveDetailEntity" item="item" separator=",">
+            (#{item.id},#{item.processInstanceId},#{item.title},#{item.operateCreateTime},#{item.operateFinishTime},#{item.originatorUserid},#{item.leaveType},#{item.status},
+            #{item.startTime},#{item.endTime},#{item.result},#{item.organizationId},#{item.remark})
+        </foreach>
+    </insert>
+    <delete id="deleteProcessInstanceId" parameterType="java.lang.String">
+        DELETE
+        FROM
+        tid_approve_detail
+        WHERE
+        process_instance_id = #{processId}
+    </delete>
+    <select id="queryProcessInstanceId" parameterType="java.lang.String" resultType="java.lang.String">
+      SELECT
+	  process_instance_id
+     FROM
+        `tid_approve_detail`
+      WHERE
+	process_instance_id = #{processId}
+    </select>
+
+    <!--查询当天两小时请假已经同意的审批，且请假结束时间小于当前时间 —— fjx —— 2020年6月8日09:18:35-->
+    <select id="selectAllApproveDetailAgree" resultType="com.dingtalk.item.pojo.ApproveDetailEntity">
+        SELECT
+        *
+        FROM
+        tid_approve_detail
+        WHERE
+        result = "agree"<!--已经同意的审批-->
+        and is_delete=0
+        and create_time <![CDATA[>=]]> CURDATE()  <!--创建的审批必须是当天的-->
+        and start_time <![CDATA[>=]]> #{begin_time}  <!--begin_time 传入的参数-，早上是8:00 下午是 14:00，可以通过配置文件修改-->
+        and end_time <![CDATA[<=]]> NOW()  <!--审批时间小于等于 job 执行的时间-->
+    </select>
+    <select id="queryLeavePeople" resultType="java.lang.String">
+        SELECT
+        user_ding_id
+        from
+        tid_punch_result
+        WHERE
+        DATE_FORMAT( base_check_time, '%Y-%m-%d' )=DATE_FORMAT( now(), '%Y-%m-%d' )
+        AND
+        is_delete=0
+        AND
+        time_result='Leave'
+    </select>
+
+
+</mapper>

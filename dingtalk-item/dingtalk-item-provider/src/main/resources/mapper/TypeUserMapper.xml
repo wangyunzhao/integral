@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.dmsdbj.integral.dingtalk.provider.dao.TypeUserDao">
+    <insert id="insertTypeUser" parameterType="java.util.List">
+        INSERT INTO tid_type_user ( id, user_ding_id, type)
+        VALUES
+        <foreach collection="typeUserEntities" item="typeUserEntitie" separator=",">
+            (#{typeUserEntitie.id},#{typeUserEntitie.userDingId},#{typeUserEntitie.type})
+        </foreach>
+    </insert>
+
+    <update id="updateTypeUser" parameterType="com.dingtalk.item.pojo.TypeUserEntity">
+        UPDATE tid_type_user
+        SET type = #{typeUserEntity.type}
+        WHERE
+            user_ding_id = #{typeUserEntity.userDingId}
+    </update>
+    <select id="selectTypeUserByUserDingId" resultType="com.dingtalk.item.pojo.TypeUserEntity">
+        SELECT
+            id,
+            user_ding_id AS userDingId,
+            type
+        FROM
+            tid_type_user
+        WHERE
+            user_ding_id = #{userDingId}
+    </select>
+    <select id="selectAllTypeUserByType" resultType="java.lang.String">
+        SELECT user_ding_id
+        FROM
+        tid_type_user
+        WHERE
+        type=#{type}
+        and is_delete=0
+    </select>
+</mapper>

@@ -1,0 +1,4 @@
+1597635975941|13|statement|connection 0|url jdbc:p6spy:mysql://d-mysql.dmsd.tech:3306/integral_dev?autoReconnect=true&useSSL=false&characterEncoding=utf-8&serverTimezone=Asia/Shanghai&allowMultiQueries=true|SELECT 1|SELECT 1
+1597635976363|40|statement|connection 1|url jdbc:p6spy:mysql://d-mysql.dmsd.tech:3306/integral_dev?autoReconnect=true&useSSL=false&characterEncoding=utf-8&serverTimezone=Asia/Shanghai&allowMultiQueries=true|SELECT 1|SELECT 1
+1599358512438|7|statement|connection 0|url jdbc:p6spy:mysql://d-mysql.dmsd.tech:3306/integral_dev?autoReconnect=true&useSSL=false&characterEncoding=utf-8&serverTimezone=Asia/Shanghai&allowMultiQueries=true|SELECT 1|SELECT 1
+1599358512483|2|statement|connection 1|url jdbc:p6spy:mysql://d-mysql.dmsd.tech:3306/integral_dev?autoReconnect=true&useSSL=false&characterEncoding=utf-8&serverTimezone=Asia/Shanghai&allowMultiQueries=true|SELECT 1|SELECT 1

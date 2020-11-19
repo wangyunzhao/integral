@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<!--
+ * @author 郝龙飞
+-->
+<mapper namespace="com.dmsdbj.integral.backstage.provider.dao.DevelopingDocumentDao">
+
+    <select id="queryDevelopingDocument" resultType="com.dmsdbj.integral.backstage.model.DevelopingDocumentModel">
+        select
+        id as id,
+        content as content,
+        operator as operator
+        from tik_developing_document 
+        where is_delete=0;
+    </select>
+
+    <insert id="addDevelopingDocument">
+        insert into tik_developing_document(id,content,create_time,update_time,operator)
+        values 
+        (#{id},#{content},now(),now(),#{operator})
+    </insert>
+    <update id="updateDevelopingDocument">
+        update tik_developing_document
+        set is_delete=1
+        where
+        id=#{id}
+    </update>
+</mapper>

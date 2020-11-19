@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>integral</artifactId>
+        <groupId>com.dmsdbj.integral.parent</groupId>
+        <version>1.0.0-SNAPSHOT</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.dmsdbj.dingtalk.item</groupId>
+    <artifactId>dingtalk-item</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
+    <modules>
+        <module>dingtalk-item-pojo</module>
+        <module>dingtalk-item-provider</module>
+    </modules>
+    <packaging>pom</packaging>
+
+    <distributionManagement>
+        <repository>
+            <id>dynamic-public</id>
+            <name>admin</name>
+            <url>http://nexus.dmsd.tech/nexus/content/repositories/dynamic-snapshots/</url>
+        </repository>
+    </distributionManagement>
+
+</project>

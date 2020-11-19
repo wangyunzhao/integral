@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<!--
+ * 获取用户打卡结果
+ * @author 董可
+ * @version 1.0.0
+ * @since 1.0.0 2020-06-02 10:43:42
+-->
+<mapper namespace="com.dmsdbj.integral.dingtalk.provider.dao.PunchResultDao">
+
+    <!--查询每次的并且没有查过的打卡结果，每天6次-董可-->
+    <select id="queryPunchResult" resultType="java.lang.String">
+        SELECT
+            plan_id
+        FROM
+            tid_schedule_detail
+        WHERE
+            DATE_FORMAT( plan_check_time, '%Y-%m-%d' ) = DATE_FORMAT( NOW(), '%Y-%m-%d' )
+            and plan_check_time &lt; NOW()
+            AND is_query = 0
+
+    </select>
+
+    <!--查询每次的并且没有查过的人的钉钉id-->
+    <select id="queryPunchResultDingId" resultType="java.lang.String">
+        SELECT
+            user_ding_id
+        FROM
+            tid_schedule_detail
+        WHERE
+            DATE_FORMAT( plan_check_time, '%Y-%m-%d' ) = DATE_FORMAT( NOW(), '%Y-%m-%d' )
+            and plan_check_time &lt; NOW()
+            AND is_query = 0
+
+    </select>
+
+    <!--更新is_query字段（方法一:使用for循环）-董可-->
+    <update id="updateQueryId" parameterType="java.lang.String">
+        UPDATE tid_schedule_detail
+        <set>
+            is_query = 1
+        </set>
+        <where>
+            plan_id = #{planid}
+            AND
+            plan_check_time &lt; NOW()
+        </where>
+    </update>
+
+    <!--根据plan_id更新is_query字段（方法二：动态sql实现）-董可-->
+    <update id="updateQueryIdNew" parameterType="java.lang.String">
+
+        UPDATE tid_schedule_detail
+        SET
+        is_query = 1
+        WHERE
+        <foreach collection="PlanIDList" item="item" index="index" open=""
+                 close="" separator="or">
+            plan_id = #{item}
+        </foreach>
+        AND
+        plan_check_time &lt; NOW()
+
+    </update>
+
+    <insert id="insertPunchResult"
+            parameterType="com.dingtalk.item.pojo.PunchResultEntity">
+        INSERT INTO tid_punch_result (
+        id,
+        user_ding_id,
+        user_jifen_id,
+        base_check_time,
+        time_result
+        )
+        values
+        <foreach collection="list" item="item" separator=",">
+            (#{item.id},
+            #{item.userId},
+            #{item.userJifenId},
+            #{item.baseCheckTime},
+            #{item.timeResult}
+            )
+        </foreach>
+    </insert>
+    <!--    获取违纪人员与违纪次数-->
+    <select id="getBreachNumberModel" resultMap="BreachNumberMap">
+        SELECT
+        p.user_jifen_id,COUNT(p.id) AS breachNumber,
+        b.id as id,b.breach_number_sum,b.create_time,b.update_time
+        FROM `tid_punch_result` p left join tid_breach_number b
+        on p.user_jifen_id =b.user_jifen_id and b.is_delete=0
+        where
+        date_format(p.create_time, '%Y-%m-%d' ) = DATE_FORMAT( DATE_SUB( NOW(), INTERVAL 1 DAY ), '%Y-%m-%d' )
+        AND p.integral &lt; 0
+        AND p.is_delete = 0
+        GROUP BY user_jifen_id
+    </select>
+    <resultMap id="BreachNumberMap"
+               type="com.dmsdbj.integral.dingtalk.model.BreachNumberModel">
+        <result property="userJifenId" column="user_jifen_id"></result>
+        <result property="breachNumberSum" column="breachNumber"></result>
+        <association property="breachNumberEntity"
+                     javaType="com.dingtalk.item.pojo.BreachNumberEntity">
+            <result property="id" column="id"></result>
+            <result property="breachNumberSum"
+                    column="breach_number_sum"></result>
+            <result property="createTime" column="create_time"></result>
+            <result property="updateTime" column="update_time"></result>
+        </association>
+    </resultMap>
+</mapper>

@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="com.dmsdbj.integral.backstage.provider.dao.UpdateBonusPointsDao">
+
+
+    <!--曹祥铭-将每个人的权重、可赠积分、减分权限恢复成初始值-2020年8月12日16:23:29-->
+    <update id="updateWeightAndIntegral">
+        UPDATE
+        tik_user
+        SET
+        giving_weight=1,
+        giving_integral=100,
+        is_permit_minus=0
+        WHERE
+        is_delete=0
+
+    </update>
+    <!--曹祥铭-根据tik_bonus_points表的配置，重新设置所有人的权重、可赠积分、减分权限-2020年8月12日16:23:19-->
+    <update id="setWeightAndIntegral">
+        UPDATE tik_user c
+        INNER JOIN (
+        SELECT
+            a.integral,
+            a.weight,
+            a.reduction_auth,
+            b.id AS user_id
+        FROM
+            tik_bonus_points a
+            LEFT JOIN tc_allusers b ON a.id = b.ding_id
+        WHERE
+            a.type = 1
+            AND a.is_delete = 0
+            AND b.is_delete = 0
+            ) e ON c.id = e.user_id
+            SET c.giving_weight = e.weight,
+            c.giving_integral = e.integral,
+            c.is_permit_minus = e.reduction_auth
+        WHERE
+            c.is_delete = 0
+    </update>
+    <update id="setWeightAndIntegralByList" parameterType="com.dmsdbj.integral.backstage.model.WeightAndIntegralModel">
+        update tik_user c  right join
+        (select a.id,a.ding_id from tc_allusers a
+	    where a.ding_id in (
+	    <foreach collection="userDingIds" item="userDingId" separator=",">
+            #{userDingId}
+        </foreach>)) b on c.id=b.id
+        set
+        c.giving_weight=#{weight},
+        c.giving_integral=#{integral}
+        where  c.is_delete=0
+	    and is_delete=0
+    </update>
+    <update id="updatePermitAuthByList">
+        update tik_user c  right join
+        (select a.id,a.ding_id from tc_allusers a
+        where a.ding_id in (
+        <foreach collection="userDingIds" item="userDingId" separator=",">
+            #{userDingId}
+        </foreach>)) b on c.id=b.id
+        set
+        c.is_permit_minus=#{reductionAuth}
+        where  c.is_delete=0
+        and is_delete=0
+
+    </update>
+    <select id="queryOrgWeightAndIntegral"
+            resultType="com.dmsdbj.integral.backstage.model.WeightAndIntegralModel">
+        select id, weight,integral,reduction_auth
+        from tik_bonus_points
+        WHERE type=0
+        And is_delete=0
+    </select>
+    <select id="queryPersonWeight" resultMap="queryPersonWeight">
+
+         SELECT
+            a.ding_id,
+            b.giving_weight,
+            b.is_permit_minus
+       FROM
+            tc_allusers a
+            RIGHT JOIN tik_user b ON a.id = b.id
+       WHERE
+            b.is_delete = 0
+            AND a.is_delete = 0
+            AND a.ding_id in
+            <foreach collection="list" item="ids" open="(" close=")" separator=",">
+                #{ids}
+            </foreach>
+
+    </select>
+
+    <resultMap id="queryPersonWeight" type="com.dmsdbj.integral.backstage.model.WeightAndIntegralModel">
+        <result column="ding_id" property="useId"></result>
+        <result column="giving_weight" property="weight"></result>
+        <result column="is_permit_minus" property="reductionAuth"></result>
+    </resultMap>
+
+</mapper>

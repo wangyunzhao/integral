@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="com.dmsdbj.integral.backstage.provider.dao.AuthenticationDao">
+
+    <select id="queryProjectBySecretId" resultType="com.dmsdbj.integral.backstage.pojo.ProjectEntity">
+        SELECT
+        `name`,english_name,secret_key
+        FROM
+        tik_project
+        WHERE
+        secret_id =#{secretId}
+        AND
+        is_delete=0
+    </select>
+</mapper>

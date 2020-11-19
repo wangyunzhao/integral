@@ -1,0 +1,34 @@
+server:
+  port: 10010
+spring:
+  application:
+    name: integral-gateway
+zuul:
+  routes:
+    backstage:
+      path: /api/integral-backstage-provider/backstage/swagger-ui.html#
+    dingtalk:
+      path: /api/integral-dingtalk-provider/dingtalk/swagger-ui.html#
+#    dingtalk: /INTEGRAL-DINGTALK-PRIVIDER/**
+#    item-service: /INTEGRAL-BACKSTAGE-PRIVIDER/**
+#    ,/INTEGRAL-DINGTALK-PRIVIDER/**
+
+#    item-service: /INTEGRAL-DINGTALK-PRIVIDER/**
+#    item-service: /item/**
+  #  host:
+  #    socket-timeout-millis: 100000
+  #    connect-timeout-millis: 100000
+#  prefix: /api
+#   path: /item/**
+#      serviceId: item-provider
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:10086/eureka
+#      defaultZone: http://points1.dmsd.tech:10086/eureka
+    registry-fetch-interval-seconds: 5
+    fetch-registry: true
+
+
+
